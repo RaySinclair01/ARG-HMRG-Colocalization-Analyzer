@@ -11,7 +11,9 @@ This workflow takes assembled contigs as input and produces statistical reports,
 
 This project was developed at the:
 *Hunan Provincial University Key Laboratory for Environmental and Ecological Health* 
+
 *Hunan Provincial University Key Laboratory for Environmental Behavior and Control Principle of New Pollutants* 
+
 *College of Environment and Resources, Xiangtan University, Xiangtan 411105, China*
 
 ---
