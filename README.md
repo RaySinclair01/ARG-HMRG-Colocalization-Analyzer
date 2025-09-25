@@ -1,3 +1,4 @@
+
 # ARG-HMRG-Colocalization-Analyzer
 
 A comprehensive bioinformatics pipeline to identify and analyze the co-localization of Antibiotic Resistance Genes (ARGs) and Heavy Metal Resistance Genes (HMRGs) in metagenomic data.
@@ -8,13 +9,10 @@ This workflow takes assembled contigs as input and produces statistical reports,
 
 ## 🏢 Institution
 
-This project was developed at the:  
-*Hunan Provincial University Key Laboratory for Environmental and Ecological Health*  
-*Hunan Provincial University Key Laboratory for Environmental Behavior and Control Principle of New Pollutants*  
+This project was developed at the:
+*Hunan Provincial University Key Laboratory for Environmental and Ecological Health*
+*Hunan Provincial University Key Laboratory for Environmental Behavior and Control Principle of New Pollutants*
 *College of Environment and Resources, Xiangtan University, Xiangtan 411105, China*
-
----
-
 
 ---
 
@@ -24,9 +22,8 @@ This project was developed at the:
 *   [Prodigal](https://github.com/hyattpd/Prodigal) for gene prediction.
 *   [DIAMOND](https://github.com/bbuchfink/diamond) for protein sequence alignment.
 *   A Unix-like environment (Linux, macOS, WSL on Windows) with Bash.
-*   [Python 3](https://www.python.org/) with the following libraries:
+*   [Python 3](https://www.python.org/) with the following library:
     *   `pandas`
-    *   `numpy` (usually installed with pandas)
 
 ### Databases
 *   **CARD**: The Comprehensive Antibiotic Resistance Database.
@@ -41,7 +38,7 @@ It is recommended to run the scripts in sequential order as they depend on the o
 ### Initial Setup
 
 1.  Place your assembled contig files (e.g., `A1A_contigs.fasta`, `A1B_contigs.fasta`) into an `input_data/` directory.
-2.  Prepare the CARD and BacMet databases as required by DIAMOND (`diamond makedb`).
+2.  Run the database preparation script (`08`) once to download and format the necessary databases.
 
 ### Script Workflow
 
@@ -60,29 +57,34 @@ It is recommended to run the scripts in sequential order as they depend on the o
 *   **Action**: Generates and executes a script to run DIAMOND for all samples.
 *   **Output**: ARG hit tables (`_card_hits.m8`) in `analysis_results/`.
 
-**10. `10_create_mge_annotation_script.sh`**
-*   **Purpose**: Annotates predicted proteins against the BacMet database to find HMRGs.
+**10. `10_create_bacmet_annotation_script.sh`**
+*   **Purpose**: Annotates predicted proteins against the combined BacMet database to find HMRGs.
 *   **Action**: Generates and executes a script to run DIAMOND for all samples.
 *   **Output**: HMRG hit tables (`_bacmet_hits.tsv`) in `analysis_results/`.
 
-**11. `11_run_colocalization_analysis_final.py`**
-*   **Purpose**: The core data integration step. Combines gene coordinates (GFF) with ARG/HMRG annotations.
-*   **Action**: Identifies co-localized contigs and generates a detailed report for each sample, including correctly parsed gene names.
-*   **Output**: Detailed co-localization reports (`_colocalization_full_details.tsv`) in a `colocalization_analysis_final_v3/` directory.
+**10.5. `10.5_create_hmrg_annotation_map.py`** (Run once after database creation)
+*   **Purpose**: **Crucial data standardization step.** Creates a "translation map" to resolve inconsistent HMRG naming in the BacMet database.
+*   **Action**: Intelligently parses the complex BacMet FASTA headers to link protein accession numbers to their correct biological gene names.
+*   **Output**: A master annotation file (`bacmet_annotation_map.tsv`) used by all subsequent scripts.
 
-**12. `12_analyze_abundance_final.py`**
-*   **Purpose**: Performs statistical analysis on the integrated data.
-*   **Action**: Calculates the abundance of each unique "ARG-HMRG" pair based on the number of contigs they share.
-*   **Output**: Gene pair abundance reports (`_abundance_report.tsv`) in an `abundance_analysis_final/` directory.
+**11. `11_run_colocalization_analysis_v6.py`**
+*   **Purpose**: The core analysis step. Integrates gene coordinates (GFF) with ARG and **standardized** HMRG annotations.
+*   **Action**: Utilizes the map from script #10.5 to translate HMRG accession numbers into accurate gene names, then identifies co-localized contigs and generates a fully annotated report.
+*   **Output**: Detailed and fully annotated reports (`_colocalization_full_details_annotated.tsv`) in a `colocalization_analysis_final/` directory.
 
-**13. `13_format_data_for_plotting.py`**
-*   **Purpose**: Prepares the **complete** co-localization data for visualization tools.
-*   **Action**: Converts the detailed report from script #11 into a clean, five-column format (`ID`, `source`, `start`, `end`, `strand`), while retaining annotation columns for advanced plotting.
-*   **Output**: Formatted data (`_plot_data.tsv`) in a `cluster_plotting_data_final/` directory.
+**12. `12_analyze_abundance_v3.py`**
+*   **Purpose**: Performs quantitative analysis on the integrated data.
+*   **Action**: Has two functions: (1) Calculates the abundance of each unique "ARG-HMRG" pair based on shared contigs. (2) Independently calculates the total abundance of each individual HMRG within a sample.
+*   **Output**: Gene pair abundance reports in `abundance_analysis_pairs/` and individual HMRG abundance reports in `abundance_analysis_hmrg/`.
 
-**14. `14_filter_by_contig_density.py`**
+**13. `13_prepare_cluster_data_v4.py`**
+*   **Purpose**: Prepares the **complete** co-localization data for advanced visualization, with data cleaning.
+*   **Action**: Formats the detailed report from script #11 and performs a **smart de-duplication**, merging genes with dual ARG/HMRG annotations into a single record.
+*   **Output**: Formatted, de-duplicated data (`_plot_data.tsv`) in a `cluster_plotting_data_final/` directory.
+
+**14. `14_filter_top_clusters-v3.py`**
 *   **Purpose**: Filters the dataset to focus on the most significant co-localization events.
-*   **Action**: Calculates a "co-localization density score" for each contig and selects the Top N (e.g., Top 10) highest-scoring contigs. Includes a smart de-duplication step for genes with dual annotations.
+*   **Action**: Calculates a "co-localization density score" for each contig and selects the Top N (e.g., Top 10) highest-scoring contigs. Also includes the smart de-duplication step to ensure the final data is clean.
 *   **Output**: A smaller, focused dataset (`_top_10_contigs_plot_data.tsv`) in a `top_10_contigs_for_plotting/` directory.
 
 **15. `15_format_for_external_plotter.py`**
