@@ -19,11 +19,11 @@ from typing import List
 # ==============================================================================
 # --- 用户配置区 ---
 # ==============================================================================
-DETAILS_FOLDER = "colocalization_analysis_final_v3"
+DETAILS_FOLDER = "colocalization_analysis_final"
 OUTPUT_FOLDER = "top_10_contigs_for_plotting"
 
 # 文件后缀定义
-DETAILS_SUFFIX = "_colocalization_full_details.tsv"
+DETAILS_SUFFIX = "_colocalization_full_details_annotated.tsv"
 
 # *** 关键控制参数 ***
 NUM_TOP_CONTIGS_TO_PLOT = 10
